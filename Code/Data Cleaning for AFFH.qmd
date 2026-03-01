@@ -10,7 +10,7 @@ import altair as alt
 import pandas as pd
 import numpy as np
 import time
-
+import matplotlib.pyplot as plt
 PATH = r"/Users/brandontexeira/desktop/AFFHT0007-Raw-Data-2024/AFFHT0007"
 ```
 
@@ -60,7 +60,7 @@ df_small_cleaned.to_csv("all_counties.csv", encoding="utf-8")
 ```
 
 ```{python}
-new_path = r"/Users/brandontexeira/dap2-redlining/Data/data_center_geodata/im3_open_source_data_center_atlas"
+new_path = r"/Users/brandontexeira/dap2-redlining/Data/Raw_Data/data_center_geodata/im3_open_source_data_center_atlas"
 path_to_atlas = os.path.join(new_path, "im3_open_source_data_center_atlas.csv")
 with open(path_to_atlas, 'r') as f:
     text = f.read()
@@ -71,7 +71,7 @@ df_atlas
 ```{python}
 df_atlas[df_atlas["state_abb"] == "IL"]
 #df_small_cleaned = df_small_cleaned.merge(df_atlas, left_on="county_name", right_on="county", how="inner", indicator=True)
-gpd_path = new_path = r"/Users/brandontexeira/dap2-redlining/Data/tl_2025_17_tract"
+gpd_path = new_path = r"/Users/brandontexeira/dap2-redlining/Data/Derived_Data/tl_2025_17_tract"
 tracts_path = os.path.join(gpd_path, "tl_2025_17_tract.shp")
 tracts = gpd.read_file(tracts_path)
 tracts
@@ -85,4 +85,21 @@ df_small_cleaned
 tracts["GEOID"] = tracts["GEOID"].astype(int)
 gdf_merged = tracts.merge(df_small_cleaned, left_on="GEOID", right_on="geoid", how="inner")
 gdf_merged
+```
+
+```{python}
+gdf_merged.to_crs("EPSG:4326")
+fig, ax = plt.subplots(figsize=(8, 10))
+
+gdf_merged.plot(ax=ax, edgecolor='#b0b0b0', linewidth=0.6, column='haz_idx', cmap='Reds', legend=True, legend_kwds={'label': "Environmental Hazard Index", 'orientation': "vertical"})
+ax.set_axis_off()
+plt.show()
+```
+
+```{python}
+fig, ax = plt.subplots(figsize=(8, 10))
+
+gdf_merged.plot(ax=ax, edgecolor='#b0b0b0', linewidth=0.6, column='pov_idx', cmap='plasma', legend=True, legend_kwds={'label': "Low Poverty Index", 'orientation': "vertical"})
+ax.set_axis_off()
+plt.show()
 ```
