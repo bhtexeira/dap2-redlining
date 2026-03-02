@@ -1,5 +1,91 @@
 import streamlit as st
+import pandas as pd
+import numpy as np
+import altair as alt
 
-st.set_page_config(page_title="IL Data Centers", layout="wide")
+# -----------------------------
+# Page configuration
+# -----------------------------
+st.set_page_config(
+    page_title="Data Center Impact on Illinois",
+    layout="wide"
+)
 
- 
+# -----------------------------
+# Title
+# -----------------------------
+st.title("Data Center Impact on Illinois")
+
+# -----------------------------
+# Sidebar navigation
+# -----------------------------
+st.sidebar.header("Navigation")
+page = st.sidebar.radio(
+    "Select view",
+    ["plot 1", "plot 2", "comparison table"]
+)
+
+# -----------------------------
+# Placeholder data (replace later)
+# -----------------------------
+@st.cache_data
+def load_data():
+    np.random.seed(42)
+    df = pd.DataFrame({
+        "category": list("ABCDE"),
+        "value": np.random.randint(10, 100, 5),
+        "value2": np.random.randint(5, 80, 5)
+    })
+    return df
+
+df = load_data()
+
+# -----------------------------
+# Page: Plot 1
+# -----------------------------
+if page == "plot 1":
+    st.subheader("Plot 1")
+
+    chart = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=alt.X("category:N", title="Category"),
+            y=alt.Y("value:Q", title="Value"),
+            tooltip=["category", "value"]
+        )
+        .properties(height=400)
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
+# -----------------------------
+# Page: Plot 2
+# -----------------------------
+elif page == "plot 2":
+    st.subheader("Plot 2")
+
+    chart = (
+        alt.Chart(df)
+        .mark_circle(size=100)
+        .encode(
+            x=alt.X("value:Q", title="Value"),
+            y=alt.Y("value2:Q", title="Value 2"),
+            tooltip=["category", "value", "value2"]
+        )
+        .properties(height=400)
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
+# -----------------------------
+# Page: Comparison Table
+# -----------------------------
+elif page == "comparison table":
+    st.subheader("Comparison Table")
+    st.dataframe(df, use_container_width=True)
+
+# -----------------------------
+# Footer (optional but useful)
+# -----------------------------
+st.caption("Template app — replace placeholder data with Illinois data center metrics.")
