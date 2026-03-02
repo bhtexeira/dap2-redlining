@@ -12,17 +12,13 @@ st.set_page_config(
 )
 
 # -----------------------------
-# Title
-# -----------------------------
-st.title("Data Center Impact on Illinois")
-
-# -----------------------------
 # Sidebar navigation
 # -----------------------------
 st.sidebar.header("Navigation")
 page = st.sidebar.radio(
     "Select view",
-    ["plot 1", "plot 2", "comparison table"]
+    ["Welcome","plot 1", "plot 2", "comparison table"],
+    index=0
 )
 
 # -----------------------------
@@ -39,6 +35,29 @@ def load_data():
     return df
 
 df = load_data()
+
+# =============================
+# Welcome Page
+# =============================
+if page == "Welcome":
+    st.title("Data Center Impact on Illinois")
+
+    st.markdown(
+        """
+        Welcome to the **Illinois Data Center Impact Dashboard**.
+
+        This tool provides exploratory views of data center activity and
+        associated impact metrics across Illinois.
+
+        **Use the sidebar to navigate:**
+
+        - **Plot 1** — Primary metric visualization  
+        - **Plot 2** — Secondary relationship view  
+        - **Comparison Table** — Underlying data inspection
+        """
+    )
+
+    st.info("Select a view from the sidebar to begin.")
 
 # -----------------------------
 # Page: Plot 1
@@ -88,4 +107,4 @@ elif page == "comparison table":
 # -----------------------------
 # Footer (optional but useful)
 # -----------------------------
-st.caption("Template app — replace placeholder data with Illinois data center metrics.")
+st.caption("Let's update with real things!!!")
