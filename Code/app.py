@@ -76,7 +76,7 @@ if page == "plot 1":
         .properties(height=400)
     )
 
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width="stretch")
 
 # -----------------------------
 # Page: Plot 2
@@ -95,14 +95,14 @@ elif page == "plot 2":
         .properties(height=400)
     )
 
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width="stretch")
 
 # -----------------------------
 # Page: Comparison Table
 # -----------------------------
 elif page == "comparison table":
     st.subheader("Comparison Table")
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df, width="stretch")
 
 # -----------------------------
 # Footer (optional but useful)
