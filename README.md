@@ -18,7 +18,7 @@ data/
     im3_open_source_data_center_atlas.gpkg  # datacenter data
   Derived_data/       # Filtered data and output plots
     tl_2025_17_tract   # geodata
-    all_counties.csv    # 2020 Illinois data on 
+    all_counties.csv    # 2020 Illinois data on environmental conditions and demographics
 code/
   preprocessing.py    # Filters data to illinois
   data_center_map.py       # Plots datacenters
