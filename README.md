@@ -22,6 +22,8 @@ data/
 code/
   preprocessing.py    # Filters data to illinois
   data_center_map.py       # Plots datacenters
+  envhaz_plot.py           # Plots environmental hazard index across Illinois
+  poverty_plot.py          # Plots poverty index across Illinois
 ```
 
 ## Usage
