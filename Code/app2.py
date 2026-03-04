@@ -10,6 +10,8 @@ import folium
 from streamlit_folium import st_folium
 import branca.colormap as cm
 
+path = 'gdf_merged.gpkg'
+
 # --- Streamlit page setup ---
 st.set_page_config(page_title="Interactive Hazard Map", layout="wide")
 st.title("Interactive Environmental Hazard Map")

@@ -4,8 +4,8 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 
-dc_data_path = 'Data/Raw_Data/data_center_geodata/im3_open_source_data_center_atlas'
-geodata_path = 'Data/Derived_Data'
+dc_data_path = '../Data/Raw_Data/data_center_geodata/im3_open_source_data_center_atlas'
+geodata_path = '../Data/Derived_Data'
 
 data_centers = pd.read_csv(os.path.join(dc_data_path, 'im3_open_source_data_center_atlas.csv'))
 tracts_path = os.path.join(geodata_path, "tl_2025_17_tract/tl_2025_17_tract.shp")
