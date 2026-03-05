@@ -26,7 +26,8 @@ column_rename = {
     "pov_idx": "Low Poverty Index",
     "pct_nonwhite": "Percent of Nonwhite Residents",
     "county_name": "County Name",
-    # Add more mappings as needed
+    "Total_Population_2020": "Total Population (2020)",
+    "pct_white": "Percent of White Residents"
 }
 
 # --- County filter dropdown ---
@@ -46,9 +47,18 @@ def filter_by_county(_gdf, county):
 
 gdf_filtered = filter_by_county(gdf_merged, selected_county)
 
-# --- Numeric columns & friendly names ---
+# --- User selects numeric column (restricted) ---
+# Columns the user is allowed to select for visualization
+visual_columns = ["haz_idx", "pov_idx", "pct_nonwhite", "Total_Population_2020", "pct_white"]
+
+# All numeric columns in the dataset
 numeric_columns = gdf_merged.select_dtypes(include=["number"]).columns.tolist()
-friendly_names = [column_rename.get(col, col) for col in numeric_columns]
+
+# Keep only the ones we want the user to select
+numeric_columns_for_select = [col for col in numeric_columns if col in visual_columns]
+
+# Friendly names for display
+friendly_names = [column_rename.get(col, col) for col in numeric_columns_for_select]
 
 selected_friendly_name = st.selectbox(
     "Select a column to visualize:",
@@ -57,7 +67,7 @@ selected_friendly_name = st.selectbox(
 )
 
 # Map back to raw column name for calculations
-selected_column = numeric_columns[friendly_names.index(selected_friendly_name)]
+selected_column = numeric_columns_for_select[friendly_names.index(selected_friendly_name)]
 
 # --- Cached function to get min/max for colormap ---
 @st.cache_data
