@@ -10,3 +10,4 @@ rtree
 folium
 branca
 streamlit-folium
+requests
