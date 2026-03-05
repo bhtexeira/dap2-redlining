@@ -119,7 +119,7 @@ def style_function(feature):
     }
 
 # --- Add GeoJSON layer with hover tooltip ---
-tooltip_fields = ['census_tract', selected_column, 'county_name']
+tooltip_fields = ['tract', selected_column, 'county_name']
 tooltip_aliases = ['Census Tract:', selected_friendly_name, 'County:']
 
 folium.GeoJson(
