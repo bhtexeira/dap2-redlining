@@ -1,6 +1,6 @@
 # Data Center Impact on Illinois
 
-Affirmatively Furhering Fair Housing Data and Mapping Tool data: https://uchicago.box.com/s/hu6l6g8rdhkxjlly80gq8tgp37fqpgek <br>
+Affirmatively Furthering Fair Housing Data and Mapping Tool data: https://uchicago.box.com/shared/static/hu6l6g8rdhkxjlly80gq8tgp37fqpgek.csv <br>
 use the AFFH_tract_AFFHT0007_December2024.csv file and run the Data Cleaning for AFFH.qmd file to create the all_counties.csv file for use
 
 ## Setup
@@ -22,6 +22,8 @@ data/
 code/
   preprocessing.py    # Filters data to illinois
   data_center_map.py       # Plots datacenters
+  envhaz_plot.py           # Plots environmental hazard index across Illinois
+  poverty_plot.py          # Plots poverty index across Illinois
 ```
 
 ## Usage

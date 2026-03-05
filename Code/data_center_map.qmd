@@ -18,7 +18,7 @@ tracts = gpd.read_file(tracts_path).to_crs("EPSG:4326")
 ```
 
 ```{python}
-data_centers = data_centers.dropna(subset=['lon', 'lat']).copy()
+data_centers_df = data_centers.dropna(subset=['lon', 'lat']).copy()
 geometry = gpd.points_from_xy(data_centers_df['lon'], data_centers_df['lat'])
 data_centers_gdf = gpd.GeoDataFrame(data_centers_df, geometry=geometry, crs="EPSG:4326")
 data_centers_il = data_centers_gdf[data_centers_gdf['state'] == 'Illinois']

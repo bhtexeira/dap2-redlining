@@ -10,6 +10,8 @@ import folium
 from streamlit_folium import st_folium
 import branca.colormap as cm
 
+path = 'gdf_merged.gpkg'
+
 # --- Streamlit page setup ---
 st.set_page_config(page_title="Interactive Hazard Map", layout="wide")
 st.title("Interactive Environmental Hazard Map")
@@ -20,6 +22,21 @@ def load_gdf():
     return gpd.read_file("/Users/brandontexeira/dap2-redlining/Code/gdf_merged.gpkg", layer="merged_layer")
 
 gdf_merged = load_gdf()
+
+# --- County filter dropdown ---
+county_options = [None] + sorted(gdf_merged["county_name"].dropna().unique())
+
+selected_county = st.selectbox(
+    "Filter map by county:",
+    county_options,
+    format_func=lambda x: "All Counties" if x is None else x
+)
+
+# Apply filter only if a county is selected
+if selected_county:
+    gdf_filtered = gdf_merged[gdf_merged["county_name"] == selected_county]
+else:
+    gdf_filtered = gdf_merged
 
 # --- User selects numeric column ---
 numeric_columns = gdf_merged.select_dtypes(include=["number"]).columns.tolist()
@@ -40,13 +57,13 @@ colormap_options = {
 }
 
 cmap_option = st.selectbox("Select a colormap:", list(colormap_options.keys()), index=0)
-col_min = gdf_merged[selected_column].min()
-col_max = gdf_merged[selected_column].max()
+col_min = gdf_filtered[selected_column].min()
+col_max = gdf_filtered[selected_column].max()
 colormap = colormap_options[cmap_option].scale(col_min, col_max)
 colormap.caption = selected_column
 
 # --- Create Folium map centered on data ---
-center = [gdf_merged.geometry.centroid.y.mean(), gdf_merged.geometry.centroid.x.mean()]
+center = [gdf_filtered.geometry.centroid.y.mean(), gdf_filtered.geometry.centroid.x.mean()]
 m = folium.Map(location=center, zoom_start=6, tiles="CartoDB positron")
 
 # --- Style function with safe fallback for missing values ---
@@ -69,7 +86,7 @@ def style_function(feature):
 
 # --- Add GeoJSON layer with hover tooltip ---
 folium.GeoJson(
-    gdf_merged.to_json(),
+    gdf_filtered.to_json(),
     style_function=style_function,
     tooltip=folium.GeoJsonTooltip(
         fields=['geoid_id', selected_column],
