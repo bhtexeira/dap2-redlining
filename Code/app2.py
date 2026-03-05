@@ -10,7 +10,7 @@ import folium
 from streamlit_folium import st_folium
 import branca.colormap as cm
 
-path = 'gdf_merged.gpkg'
+path = "../Data/Derived_Data"
 
 # --- Streamlit page setup ---
 st.set_page_config(page_title="Interactive Hazard Map", layout="wide")
@@ -19,7 +19,7 @@ st.title("Interactive Environmental Hazard Map")
 # --- Load GeoDataFrame ---
 @st.cache_data
 def load_gdf():
-    return gpd.read_file("/Users/brandontexeira/dap2-redlining/Code/gdf_merged.gpkg", layer="merged_layer")
+    return gpd.read_file(os.path.join(path, 'gdf_merged.gpkg'), layer="merged_layer")
 
 gdf_merged = load_gdf()
 
