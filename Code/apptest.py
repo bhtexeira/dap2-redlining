@@ -39,10 +39,10 @@ selected_county = st.selectbox(
 
 # --- Cached function to filter GeoDataFrame by county ---
 @st.cache_data
-def filter_by_county(gdf, county):
+def filter_by_county(_gdf, county):
     if county:
-        return gdf[gdf["county_name"] == county]
-    return gdf
+        return _gdf[_gdf["county_name"] == county]
+    return _gdf
 
 gdf_filtered = filter_by_county(gdf_merged, selected_county)
 
@@ -61,8 +61,8 @@ selected_column = numeric_columns[friendly_names.index(selected_friendly_name)]
 
 # --- Cached function to get min/max for colormap ---
 @st.cache_data
-def get_column_range(gdf, column):
-    return gdf[column].min(), gdf[column].max()
+def get_column_range(_gdf, column):
+    return _gdf[column].min(), _gdf[column].max()
 
 col_min, col_max = get_column_range(gdf_filtered, selected_column)
 
@@ -84,8 +84,8 @@ colormap.caption = selected_friendly_name
 
 # --- Cached function to convert filtered GeoDataFrame to GeoJSON ---
 @st.cache_data
-def gdf_to_geojson(gdf):
-    return gdf.to_json()
+def gdf_to_geojson(_gdf):
+    return _gdf.to_json()
 
 geojson_data = gdf_to_geojson(gdf_filtered)
 
