@@ -1,25 +1,22 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
-import altair as alt
 import geopandas as gpd
-import os
-import time
-import matplotlib.pyplot as plt
 import folium
 from streamlit_folium import st_folium
 import branca.colormap as cm
-
-path = "Data/Derived_Data"
+import os
 
 # --- Streamlit page setup ---
 st.set_page_config(page_title="Interactive Hazard Map", layout="wide")
 st.title("Interactive Environmental Hazard Map")
 
-# --- Load GeoDataFrame ---
+# --- Path to data (relative to repo root) ---
+path = "Data/Derived_Data"
+
+# --- Cached function to load GeoDataFrame ---
 @st.cache_data
 def load_gdf():
-    return gpd.read_file(os.path.join(path, 'cleaned_gdf.geojson'))
+    data_file = os.path.join(path, 'cleaned_gdf.geojson')
+    return gpd.read_file(data_file)
 
 gdf_merged = load_gdf()
 
@@ -32,11 +29,14 @@ selected_county = st.selectbox(
     format_func=lambda x: "All Counties" if x is None else x
 )
 
-# Apply filter only if a county is selected
-if selected_county:
-    gdf_filtered = gdf_merged[gdf_merged["county_name"] == selected_county]
-else:
-    gdf_filtered = gdf_merged
+# --- Cached function to filter by county ---
+@st.cache_data
+def filter_by_county(gdf, county):
+    if county:
+        return gdf[gdf["county_name"] == county]
+    return gdf
+
+gdf_filtered = filter_by_county(gdf_merged, selected_county)
 
 # --- User selects numeric column ---
 numeric_columns = gdf_merged.select_dtypes(include=["number"]).columns.tolist()
@@ -45,6 +45,13 @@ selected_column = st.selectbox(
     numeric_columns,
     index=numeric_columns.index("haz_idx") if "haz_idx" in numeric_columns else 0
 )
+
+# --- Cached function to get min/max for colormap ---
+@st.cache_data
+def get_column_range(gdf, column):
+    return gdf[column].min(), gdf[column].max()
+
+col_min, col_max = get_column_range(gdf_filtered, selected_column)
 
 # --- Colormap definitions ---
 colormap_options = {
@@ -57,10 +64,15 @@ colormap_options = {
 }
 
 cmap_option = st.selectbox("Select a colormap:", list(colormap_options.keys()), index=0)
-col_min = gdf_filtered[selected_column].min()
-col_max = gdf_filtered[selected_column].max()
 colormap = colormap_options[cmap_option].scale(col_min, col_max)
 colormap.caption = selected_column
+
+# --- Cached function to convert GeoDataFrame to GeoJSON ---
+@st.cache_data
+def gdf_to_geojson(gdf):
+    return gdf.to_json()
+
+geojson_data = gdf_to_geojson(gdf_filtered)
 
 # --- Create Folium map centered on data ---
 center = [gdf_filtered.geometry.centroid.y.mean(), gdf_filtered.geometry.centroid.x.mean()]
@@ -70,7 +82,6 @@ m = folium.Map(location=center, zoom_start=6, tiles="CartoDB positron")
 def style_function(feature):
     val = feature['properties'].get(selected_column)
     if val is None:
-        # fallback color for missing data
         return {
             'fillColor': '#cccccc',
             'color': '#b0b0b0',
@@ -86,7 +97,7 @@ def style_function(feature):
 
 # --- Add GeoJSON layer with hover tooltip ---
 folium.GeoJson(
-    gdf_filtered.to_json(),
+    geojson_data,
     style_function=style_function,
     tooltip=folium.GeoJsonTooltip(
         fields=['geoid', selected_column],
