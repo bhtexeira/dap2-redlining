@@ -424,7 +424,7 @@ if page == "Comparison Dashboard":
         )
         .properties(height=22 * len(summary))
     )
-    st.altair_chart(bar, use_container_width=True)
+    st.altair_chart(bar, width="stretch)
 
     st.subheader("Distribution of Tract Values by County")
     # choose a subset of counties for boxplot to keep it readable
@@ -448,7 +448,7 @@ if page == "Comparison Dashboard":
             )
             .properties(height=420)
         )
-        st.altair_chart(box, use_container_width=True)
+        st.altair_chart(box, width="stretch")
 
     st.subheader("Download county summary")
     st.download_button(
