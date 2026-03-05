@@ -23,8 +23,6 @@ def load_gdf():
 
 gdf_merged = load_gdf()
 
-gdf_merged
-
 # --- County filter dropdown ---
 county_options = [None] + sorted(gdf_merged["county_name"].dropna().unique())
 
