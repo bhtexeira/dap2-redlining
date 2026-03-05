@@ -6,7 +6,7 @@ use the AFFH_tract_AFFHT0007_December2024.csv file and run the Data Cleaning for
 ## Setup
 
 ```bash
-conda env create -f environment.yml
+conda env create -f requirements.txt
 conda activate datacenter_analysis
 ```
 
