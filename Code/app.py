@@ -18,7 +18,7 @@ import requests
 # Examples that usually work:
 # - Box "shared/static/....gpkg"
 # - S3 https://.../file.gpkg
-GPKG_URL = "https://uchicago.box.com/s/5mirakc5f539szi8kqwckt4tt493vm6y"
+GPKG_URL = "https://uchicago.box.com/shared/static/5mirakc5f539szi8kqwckt4tt493vm6y.gpkg"
 
 # If you prefer not to hardcode the URL, you can set it as a Streamlit secret:
 # st.secrets["GPKG_URL"]
