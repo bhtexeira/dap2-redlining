@@ -15,8 +15,6 @@ dependencies:
 
   # Geospatial stack (GeoPandas + drivers)
   - geopandas
-  - fiona
-  - gdal
   - pyproj
   - shapely
   - rtree
