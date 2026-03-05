@@ -1,4 +1,10 @@
+import pandas as pd
 import matplotlib.pyplot as plt
+import os
+import geopandas as gpd
+
+path = '../Data/Derived_Data'
+gdf = gpd.read_file(os.path.join(path, 'cleaned_gdf.geojson'))
 
 fig, ax = plt.subplots(figsize=(8, 10))
 
