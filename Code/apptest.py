@@ -12,35 +12,59 @@ path = "Data/Derived_Data"
 st.set_page_config(page_title="Interactive Hazard Map", layout="wide")
 st.title("Interactive Environmental Hazard Map")
 
-# --- Load GeoDataFrame ---
+# --- Cached function to load GeoDataFrame ---
 @st.cache_data
 def load_gdf():
-    return gpd.read_file(os.path.join(path, 'cleaned_gdf.geojson'))
+    data_file = os.path.join(path, 'cleaned_gdf.geojson')
+    return gpd.read_file(data_file)
 
 gdf_merged = load_gdf()
 
+# --- Column rename dictionary ---
+column_rename = {
+    "haz_idx": "Environmental Hazard Index",
+    "pov_idx": "Low Poverty Index",
+    "pct_nonwhite": "Percent of Nonwhite Residents",
+    "county_name": "County Name",
+    # Add more mappings as needed
+}
+
 # --- County filter dropdown ---
 county_options = [None] + sorted(gdf_merged["county_name"].dropna().unique())
-
 selected_county = st.selectbox(
     "Filter map by county:",
     county_options,
     format_func=lambda x: "All Counties" if x is None else x
 )
 
-# Apply filter only if a county is selected
-if selected_county:
-    gdf_filtered = gdf_merged[gdf_merged["county_name"] == selected_county]
-else:
-    gdf_filtered = gdf_merged
+# --- Cached function to filter GeoDataFrame by county ---
+@st.cache_data
+def filter_by_county(gdf, county):
+    if county:
+        return gdf[gdf["county_name"] == county]
+    return gdf
 
-# --- User selects numeric column ---
+gdf_filtered = filter_by_county(gdf_merged, selected_county)
+
+# --- Numeric columns & friendly names ---
 numeric_columns = gdf_merged.select_dtypes(include=["number"]).columns.tolist()
-selected_column = st.selectbox(
+friendly_names = [column_rename.get(col, col) for col in numeric_columns]
+
+selected_friendly_name = st.selectbox(
     "Select a column to visualize:",
-    numeric_columns,
-    index=numeric_columns.index("haz_idx") if "haz_idx" in numeric_columns else 0
+    friendly_names,
+    index=friendly_names.index(column_rename.get("haz_idx", "haz_idx"))
 )
+
+# Map back to raw column name for calculations
+selected_column = numeric_columns[friendly_names.index(selected_friendly_name)]
+
+# --- Cached function to get min/max for colormap ---
+@st.cache_data
+def get_column_range(gdf, column):
+    return gdf[column].min(), gdf[column].max()
+
+col_min, col_max = get_column_range(gdf_filtered, selected_column)
 
 # --- Colormap definitions ---
 colormap_options = {
@@ -55,14 +79,27 @@ colormap_options = {
 }
 
 cmap_option = st.selectbox("Select a colormap:", list(colormap_options.keys()), index=0)
-col_min = gdf_filtered[selected_column].min()
-col_max = gdf_filtered[selected_column].max()
 colormap = colormap_options[cmap_option].scale(col_min, col_max)
-colormap.caption = selected_column
+colormap.caption = selected_friendly_name
 
-# --- Create Folium map centered on data ---
-center = [gdf_filtered.geometry.centroid.y.mean(), gdf_filtered.geometry.centroid.x.mean()]
-m = folium.Map(location=center, zoom_start=6, tiles="CartoDB positron")
+# --- Cached function to convert filtered GeoDataFrame to GeoJSON ---
+@st.cache_data
+def gdf_to_geojson(gdf):
+    return gdf.to_json()
+
+geojson_data = gdf_to_geojson(gdf_filtered)
+
+# --- Create Folium map with dynamic zoom ---
+if selected_county:
+    # Zoom in on selected county
+    center = [gdf_filtered.geometry.centroid.y.mean(), gdf_filtered.geometry.centroid.x.mean()]
+    zoom = 9
+else:
+    # Show full dataset
+    center = [gdf_merged.geometry.centroid.y.mean(), gdf_merged.geometry.centroid.x.mean()]
+    zoom = 6
+
+m = folium.Map(location=center, zoom_start=zoom, tiles="CartoDB positron")
 
 # --- Style function with safe fallback for missing values ---
 def style_function(feature):
@@ -81,13 +118,15 @@ def style_function(feature):
         'fillOpacity': 0.7
     }
 
-# --- Add GeoJSON layer with hover tooltip ---
+# --- Add GeoJSON layer with hover tooltip using friendly name ---
+tooltip_aliases = ['geoid:', selected_friendly_name]
+
 folium.GeoJson(
-    gdf_filtered.to_json(),
+    geojson_data,
     style_function=style_function,
     tooltip=folium.GeoJsonTooltip(
         fields=['geoid', selected_column],
-        aliases=['geoid:', f'{selected_column}:'],
+        aliases=tooltip_aliases,
         localize=True
     )
 ).add_to(m)
