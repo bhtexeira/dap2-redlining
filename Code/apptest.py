@@ -118,21 +118,19 @@ def style_function(feature):
         'fillOpacity': 0.7
     }
 
-# --- Add GeoJSON layer with hover tooltip using friendly name ---
-tooltip_aliases = ['geoid:', selected_friendly_name]
+# --- Add GeoJSON layer with hover tooltip ---
+tooltip_fields = ['census_tract', selected_column, 'county_name']
+tooltip_aliases = ['Census Tract:', selected_friendly_name, 'County:']
 
 folium.GeoJson(
     geojson_data,
     style_function=style_function,
     tooltip=folium.GeoJsonTooltip(
-        fields=['geoid', selected_column],
+        fields=tooltip_fields,
         aliases=tooltip_aliases,
         localize=True
     )
 ).add_to(m)
-
-# --- Add colormap legend ---
-colormap.add_to(m)
 
 # --- Display map in Streamlit ---
 st_folium(m, width=800, height=600)
