@@ -158,7 +158,7 @@ def make_colormap(gdf: gpd.GeoDataFrame, column: str, cmap_name: str):
 st.sidebar.title("Navigation")
 page = st.sidebar.radio(
     "Select page",
-    ["Welcome", "Hazard Map", "Data Centers Map", "Comparison Dashboard"],
+    ["Welcome", "Data Centers Map", "Comparison Dashboard"],
 )
 
 # =========================
@@ -170,10 +170,9 @@ if page == "Welcome":
     st.markdown(
         """
 ### What this app does
-This Streamlit app provides tract-level views of environmental hazard indicators across Illinois, plus an overlay of data center locations and a comparison dashboard.
+This Streamlit app provides tract-level views of environmental hazard indicators across Illinois plus an overlay of data center locations and a comparison dashboard.
 
 ### Pages
-- **Hazard Map**: choropleth of a selected indicator with a county filter.
 - **Data Centers Map**: hazard choropleth + point overlay of data center locations.
 - **Comparison Dashboard**: county-level summaries and distributions with interactive charts.
 
@@ -183,7 +182,7 @@ This Streamlit app provides tract-level views of environmental hazard indicators
         """
     )
 
-    st.info("Use the sidebar to open the Hazard Map, Data Centers Map, or the Comparison Dashboard.")
+    st.info("Use the sidebar to open the Data Centers Map or the Comparison Dashboard.")
 
 # =========================
 # COMMON: LOAD TRACTS (ONLY WHEN NEEDED)
@@ -201,71 +200,6 @@ def get_tracts() -> gpd.GeoDataFrame:
         pass
 
     return gdf
-
-
-# =========================
-# PAGE: HAZARD MAP
-# =========================
-if page == "Hazard Map":
-    st.title("Interactive Environmental Hazard Map")
-
-    gdf_merged = get_tracts()
-
-    # County filter
-    if "county_name" in gdf_merged.columns:
-        county_options = [None] + sorted(gdf_merged["county_name"].dropna().unique().tolist())
-    else:
-        county_options = [None]
-
-    selected_county = st.selectbox(
-        "Filter map by county:",
-        county_options,
-        format_func=lambda x: "All Counties" if x is None else x,
-    )
-
-    if selected_county and "county_name" in gdf_merged.columns:
-        gdf_filtered = gdf_merged[gdf_merged["county_name"] == selected_county].copy()
-    else:
-        gdf_filtered = gdf_merged.copy()
-
-    # Variable selector
-    numeric_columns = gdf_merged.select_dtypes(include=["number"]).columns.tolist()
-    if not numeric_columns:
-        st.error("No numeric columns found to visualize.")
-        st.stop()
-
-    selected_column = st.selectbox(
-        "Select a column to visualize:",
-        numeric_columns,
-        index=numeric_columns.index("haz_idx") if "haz_idx" in numeric_columns else 0,
-    )
-
-    cmap_option = st.selectbox("Select a colormap:", ["Reds", "Blues", "Greens", "YlOrRd", "Viridis", "Plasma"], index=0)
-    colormap = make_colormap(gdf_filtered, selected_column, cmap_option)
-
-    # Build map
-    center = safe_center_latlon(gdf_filtered)
-    m = folium.Map(location=center, zoom_start=6, tiles="CartoDB positron")
-
-    def style_function(feature):
-        val = feature["properties"].get(selected_column)
-        if val is None or (isinstance(val, float) and np.isnan(val)):
-            return {"fillColor": "#cccccc", "color": "#b0b0b0", "weight": 0.6, "fillOpacity": 0.7}
-        return {"fillColor": colormap(val), "color": "#b0b0b0", "weight": 0.6, "fillOpacity": 0.7}
-
-    tooltip_fields = [c for c in ["geoid_id", selected_column] if c in gdf_filtered.columns]
-    tooltip_aliases = []
-    for c in tooltip_fields:
-        tooltip_aliases.append("geoid_id:" if c == "geoid_id" else f"{c}:")
-
-    folium.GeoJson(
-        gdf_filtered.to_json(),
-        style_function=style_function,
-        tooltip=folium.GeoJsonTooltip(fields=tooltip_fields, aliases=tooltip_aliases, localize=True),
-    ).add_to(m)
-
-    colormap.add_to(m)
-    st_folium(m, width=950, height=650)
 
 # =========================
 # PAGE: DATA CENTERS MAP
